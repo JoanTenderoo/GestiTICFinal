@@ -1,0 +1,45 @@
+body, html {
+  width: 100%;
+  font-family: "Poppins", sans-serif;
+  background: #f7f8fa;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.centered-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Estilos personalizados para componentes MUI */
+.MuiButton-contained {
+  background-color: #1976d2 !important;
+}
+
+.MuiButton-contained:hover {
+  background-color: #1565c0 !important;
+}
+
+.MuiPaper-root {
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+}
+
+.MuiTextField-root {
+  width: 100%;
+}
+
+.MuiTableCell-root {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.MuiTableHead-root {
+  background-color: #fafafa;
+}
