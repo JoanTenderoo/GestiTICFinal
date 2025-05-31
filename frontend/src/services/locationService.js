@@ -4,7 +4,7 @@ export const locationService = {
   // Crear una nueva ubicación
   createLocation: async (locationData) => {
     try {
-      const response = await api.post('/locations', locationData);
+      const response = await api.post('/ubicaciones', locationData);
       return response.data;
     } catch (error) {
       throw error;
@@ -14,7 +14,7 @@ export const locationService = {
   // Obtener todas las ubicaciones
   getLocations: async () => {
     try {
-      const response = await api.get('/locations');
+      const response = await api.get('/ubicaciones');
       return response.data;
     } catch (error) {
       throw error;
@@ -24,7 +24,7 @@ export const locationService = {
   // Obtener una ubicación por ID
   getLocationById: async (id) => {
     try {
-      const response = await api.get(`/locations/${id}`);
+      const response = await api.get(`/ubicaciones/${id}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -34,7 +34,7 @@ export const locationService = {
   // Actualizar una ubicación
   updateLocation: async (id, locationData) => {
     try {
-      const response = await api.put(`/locations/${id}`, locationData);
+      const response = await api.put(`/ubicaciones/${id}`, locationData);
       return response.data;
     } catch (error) {
       throw error;
@@ -44,7 +44,7 @@ export const locationService = {
   // Eliminar una ubicación
   deleteLocation: async (id) => {
     try {
-      const response = await api.delete(`/locations/${id}`);
+      const response = await api.delete(`/ubicaciones/${id}`);
       return response.data;
     } catch (error) {
       if (error.response && error.response.status === 500) {

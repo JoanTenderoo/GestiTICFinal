@@ -12,9 +12,8 @@ import UbicacionesTable from './UbicacionesTable';
 import EquipamientoTable from './EquipamientoTable';
 import authService from '../services/authService';
 import { useNavigate } from 'react-router-dom';
-import { incidenceService } from '../services/equipmentService';
-import { locationService } from '../services/locationService';
 import { equipmentService } from '../services/equipmentService';
+import { locationService } from '../services/locationService';
 import {
     Warning as WarningIcon,
     LocationOn as LocationIcon,
@@ -43,7 +42,7 @@ const StatsCard = ({ title, value, icon, color }) => {
             transition={{ duration: 0.5 }}
         sx={{
                 p: 2,
-            height: '100%',
+                height: 140,
                 background: `linear-gradient(135deg, ${color} 0%, ${alpha(color, 0.8)} 100%)`,
                 borderRadius: '16px',
                 transition: 'all 0.3s ease-in-out',
@@ -158,9 +157,9 @@ const Dashboard = () => {
     const fetchStats = async () => {
         try {
             const [incidencias, ubicaciones, equipamiento] = await Promise.all([
-                incidenceService.getIncidencias(),
+                equipmentService.getIncidences(),
                 locationService.getLocations(),
-                equipmentService.getEquipments()
+                equipmentService.getEquipment()
             ]);
             setStats({
                 incidencias: incidencias.length,
@@ -211,38 +210,53 @@ const Dashboard = () => {
 
     const userName = user?.usuario?.nombre || 'Usuario';
     return (
-        <Box sx={{ display: 'flex', minHeight: '100vh', background: '#f7f8fa' }}>
+        <Box sx={{ 
+            display: 'flex', 
+            minHeight: '100vh', 
+            maxHeight: '100vh', // Altura máxima del viewport
+            background: '#f7f8fa',
+            overflow: 'hidden' // Prevenir overflow
+        }}>
             <Sidebar user={user} onSelectView={setSelectedView} selectedView={selectedView} />
             <Box 
                 component="main" 
                 sx={{ 
                     flexGrow: 1, 
-                    p: 4, 
-                    minHeight: '100vh', 
-                    overflow: 'hidden',
-                    background: 'linear-gradient(135deg, #f7f8fa 0%, #ffffff 100%)'
+                    p: { xs: 2, sm: 3, md: 4 }, 
+                    pt: { xs: 10, lg: 4 }, // Extra top padding en móviles para el AppBar
+                    height: '100vh', // Altura fija del viewport
+                    overflow: 'auto', // Scroll solo cuando sea necesario
+                    background: 'linear-gradient(135deg, #f7f8fa 0%, #ffffff 100%)',
+                    width: { xs: '100%', lg: 'calc(100% - 280px)' },
+                    display: 'flex',
+                    flexDirection: 'column'
                 }}
             >
-                <Container maxWidth="xl">
+                <Container maxWidth="xl" sx={{ 
+                    flexGrow: 1, 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    pb: 2 // Padding bottom para separar del final
+                }}>
                     <MotionBox
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        sx={{ mb: 2 }}
+                        sx={{ mb: { xs: 1, sm: 2 } }}
                     >
                         <Box sx={{ 
                             display: 'flex', 
                             alignItems: 'center', 
-                            gap: 2,
-                            mb: 2,
-                            p: 1.5,
+                            gap: { xs: 1, sm: 2 },
+                            mb: { xs: 1, sm: 2 },
+                            p: { xs: 1, sm: 1.5 },
                             background: 'white',
                             borderRadius: '16px',
                             boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
                             border: '1px solid rgba(0,0,0,0.05)'
                         }}>
                             <DashboardIcon sx={{ 
-                                fontSize: 28,
+                                fontSize: { xs: 24, sm: 28 },
                                 color: theme.palette.primary.main
                             }} />
                             <Typography 
@@ -250,7 +264,7 @@ const Dashboard = () => {
                                 fontWeight={700}
                                 sx={{
                                     color: theme.palette.primary.main,
-                                    fontSize: '1.5rem'
+                                    fontSize: { xs: '1.25rem', sm: '1.5rem' }
                                 }}
                             >
                                 Dashboard
@@ -258,16 +272,16 @@ const Dashboard = () => {
                         </Box>
                     </MotionBox>
                 
-                    <Grid container spacing={2} mb={2}>
-                    <Grid item xs={12} md={4}>
+                    <Grid container spacing={{ xs: 1, sm: 2 }} mb={{ xs: 1, sm: 2 }}>
+                    <Grid item xs={12} sm={6} md={4}>
                         <StatsCard
-                            title="Incidencias Totales"
+                            title="Incidencias"
                             value={stats.incidencias}
                                 icon={<WarningIcon sx={{ color: theme.palette.warning.main, fontSize: 24 }} />}
                                 color={theme.palette.warning.main}
                         />
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} sm={6} md={4}>
                         <StatsCard
                             title="Ubicaciones"
                             value={stats.ubicaciones}
@@ -275,7 +289,7 @@ const Dashboard = () => {
                                 color={theme.palette.info.main}
                         />
                     </Grid>
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} sm={12} md={4}>
                         <StatsCard
                             title="Equipamiento"
                             value={stats.equipamiento}
@@ -290,19 +304,19 @@ const Dashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
-                        <Grid container spacing={2} mb={2}>
+                        <Grid container spacing={{ xs: 1, sm: 2 }} mb={{ xs: 1, sm: 2 }}>
                     {isAdmin && (
                         <>
-                            <Grid item xs={12} sm={6} md={3}>
+                            <Grid item xs={12} sm={6} lg={3}>
                                 <AddLocation />
                             </Grid>
-                            <Grid item xs={12} sm={6} md={3}>
+                            <Grid item xs={12} sm={6} lg={3}>
                                 <AddEquipment />
                             </Grid>
-                            <Grid item xs={12} sm={6} md={3}>
+                            <Grid item xs={12} sm={6} lg={3}>
                                 <AddIncidence />
                             </Grid>
-                            <Grid item xs={12} sm={6} md={3}>
+                            <Grid item xs={12} sm={6} lg={3}>
                                 <EditUsuarios />
                             </Grid>
                         </>
@@ -319,15 +333,20 @@ const Dashboard = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.4 }}
+                        sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
                     >
                         <Paper 
                             elevation={0}
                             sx={{ 
-                                p: 3,
+                                p: { xs: 2, sm: 3 },
                                 borderRadius: '16px',
                                 background: 'white',
                                 boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                                border: '1px solid rgba(0,0,0,0.05)'
+                                border: '1px solid rgba(0,0,0,0.05)',
+                                flexGrow: 1,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                minHeight: 0 // Importante para el flex
                             }}
                         >
                     {selectedView === 'incidencias' && <IncidenciasTable key={refreshKey.incidencias} />}
@@ -335,6 +354,18 @@ const Dashboard = () => {
                     {selectedView === 'equipamiento' && <EquipamientoTable key={refreshKey.equipamiento} />}
                 </Paper>
                     </MotionBox>
+                    
+                    {/* Footer */}
+                    <Box sx={{ 
+                        mt: 2,
+                        py: 1,
+                        textAlign: 'center',
+                        color: 'text.secondary',
+                        fontSize: '0.75rem',
+                        opacity: 0.7
+                    }}>
+                        © 2024 GestiTIC v1.0 - Sistema de Gestión de Equipamiento IT
+                    </Box>
                 </Container>
             </Box>
         </Box>

@@ -21,7 +21,8 @@ import {
     Typography,
     useTheme,
     alpha,
-    styled
+    styled,
+    useMediaQuery
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { motion } from 'framer-motion';
@@ -122,11 +123,12 @@ const EquipamientoTable = () => {
     const user = authService.getCurrentUser();
     const isAdmin = [user?.rol, user?.usuario?.rol].some(r => r === 'administrador' || r === 'admin');
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => {
         const fetchEquipos = async () => {
             try {
-                const data = await equipmentService.getEquipments();
+                const data = await equipmentService.getEquipment();
                 setEquipos(data);
                 setLoading(false);
             } catch (err) {
@@ -189,7 +191,7 @@ const EquipamientoTable = () => {
             setOpenEditModal(false);
             setEditForm(null);
             // Refrescar equipamiento
-            const data = await equipmentService.getEquipments();
+            const data = await equipmentService.getEquipment();
             setEquipos(data);
             // Disparar evento de actualización
             window.dispatchEvent(new Event('updateEquipamiento'));
@@ -223,7 +225,7 @@ const EquipamientoTable = () => {
             setOpenDeleteModal(false);
             setEquipoToDelete(null);
             // Refrescar equipamiento
-            const equiposData = await equipmentService.getEquipments();
+            const equiposData = await equipmentService.getEquipment();
             setEquipos(equiposData);
             // Disparar evento de actualización
             window.dispatchEvent(new Event('updateEquipamiento'));
@@ -257,33 +259,56 @@ const EquipamientoTable = () => {
     const columns = useMemo(() => {
         const baseColumns = [
             { field: 'modelo', headerName: 'Modelo', flex: 1, minWidth: 120 },
-            { field: 'numero_serie', headerName: 'Nº Serie', flex: 1, minWidth: 120 },
-            { field: 'nombre_ubicacion', headerName: 'Ubicación', flex: 1, minWidth: 140 },
-            { field: 'estado', headerName: 'Estado', flex: 1, minWidth: 100, renderCell: (params) => (
-                <Chip label={params.value} color={getEstadoColor(params.value)} size="small" />
-            ) },
-            { field: 'observaciones', headerName: 'Observaciones', flex: 2, minWidth: 180, renderCell: (params) => (
-                <Tooltip title={params.value || ''}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', maxWidth: 180 }}>{params.value}</span></Tooltip>
-            ) }
+            { field: 'numero_serie', headerName: 'Nº Serie', flex: 1, minWidth: 100, hide: isMobile },
+            { field: 'nombre_ubicacion', headerName: 'Ubicación', flex: 1, minWidth: 100 },
+            { 
+                field: 'estado', 
+                headerName: 'Estado', 
+                flex: 1, 
+                minWidth: 80, 
+                renderCell: (params) => (
+                    <Chip label={params.value} color={getEstadoColor(params.value)} size="small" />
+                ) 
+            },
+            { 
+                field: 'observaciones', 
+                headerName: 'Observaciones', 
+                flex: 2, 
+                minWidth: isMobile ? 120 : 180, 
+                hide: isMobile,
+                renderCell: (params) => (
+                    <Tooltip title={params.value || ''}>
+                        <span style={{ 
+                            whiteSpace: 'nowrap', 
+                            overflow: 'hidden', 
+                            textOverflow: 'ellipsis', 
+                            display: 'block', 
+                            maxWidth: isMobile ? 120 : 180 
+                        }}>
+                            {params.value}
+                        </span>
+                    </Tooltip>
+                ) 
+            }
         ];
         if (isAdmin) {
             baseColumns.push({
                 field: 'acciones',
                 headerName: 'Acciones',
                 flex: 1,
-                minWidth: 120,
+                minWidth: isMobile ? 80 : 120,
                 sortable: false,
                 filterable: false,
                 renderCell: (params) => (
-                    <Box display="flex" gap={1}>
+                    <Box display="flex" gap={isMobile ? 0.5 : 1}>
                         <Tooltip title="Editar">
                             <IconButton size="small" onClick={() => handleOpenEditModal(params.row)}>
-                                <EditIcon />
+                                <EditIcon fontSize={isMobile ? 'small' : 'medium'} />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Eliminar">
                             <IconButton size="small" onClick={() => handleOpenDeleteModal(params.row)}>
-                                <DeleteIcon />
+                                <DeleteIcon fontSize={isMobile ? 'small' : 'medium'} />
                             </IconButton>
                         </Tooltip>
                     </Box>
@@ -291,7 +316,7 @@ const EquipamientoTable = () => {
             });
         }
         return baseColumns;
-    }, [isAdmin]);
+    }, [isAdmin, isMobile]);
 
     const filteredEquipos = useMemo(() => {
         if (!searchText) return equipos;
@@ -320,11 +345,12 @@ const EquipamientoTable = () => {
     }
 
     return (
-        <StyledBox>
+        <StyledBox sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <MotionBox
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
+                sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
             >
                 <Typography variant="h6" className="equipamiento-title" gutterBottom>
                     Equipamiento Registrado
@@ -339,7 +365,7 @@ const EquipamientoTable = () => {
                     fullWidth
                 />
             </Box>
-                <Box sx={{ height: 420, width: '100%' }}>
+                <Box sx={{ width: '100%', flexGrow: 1, minHeight: 0 }}>
             <DataGrid
                 rows={filteredEquipos.map(eq => {
                     const eqUbic = equiposConUbicacion.find(e => e.id_equipamiento === eq.id_equipamiento);
@@ -350,18 +376,50 @@ const EquipamientoTable = () => {
                 pageSize={8}
                 rowsPerPageOptions={[8, 16, 32]}
                 disableSelectionOnClick
-                        sx={{
-                            '& .MuiDataGrid-toolbarContainer': {
-                                padding: '8px 16px',
-                                backgroundColor: 'transparent'
-                            },
-                            '& .MuiButton-root': {
-                                color: theme.palette.primary.main,
-                                '&:hover': {
-                                    backgroundColor: alpha(theme.palette.primary.main, 0.04)
-                                }
-                            }
-                        }}
+                autoHeight={false}
+                localeText={{
+                    noRowsLabel: 'Todavía no hay datos',
+                    toolbarColumns: 'Columnas', 
+                    toolbarFilters: 'Filtros', 
+                    toolbarDensity: 'Densidad', 
+                    toolbarExport: 'Exportar' 
+                }}
+                sx={{
+                    height: '100%',
+                    '& .MuiDataGrid-toolbarContainer': {
+                        padding: '8px 16px',
+                        backgroundColor: 'transparent'
+                    },
+                    '& .MuiButton-root': {
+                        color: theme.palette.primary.main,
+                        '&:hover': {
+                            backgroundColor: alpha(theme.palette.primary.main, 0.04)
+                        }
+                    },
+                    '& .MuiDataGrid-cell': {
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center'
+                    },
+                    '& .MuiDataGrid-cell[data-field="acciones"]': {
+                        justifyContent: 'center'
+                    },
+                    '& .MuiDataGrid-columnHeaderTitle': {
+                        textAlign: 'center',
+                        width: '100%'
+                    },
+                    '& .MuiDataGrid-columnHeader': {
+                        display: 'flex',
+                        justifyContent: 'center'
+                    },
+                    '& .MuiDataGrid-overlay': {
+                        backgroundColor: 'transparent'
+                    },
+                    '& .MuiDataGrid-footerContainer': {
+                        borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                    }
+                }}
             />
                 </Box>
             </MotionBox>

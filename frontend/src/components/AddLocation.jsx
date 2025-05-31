@@ -19,6 +19,7 @@ import {
     LocationOn as LocationOnIcon,
     Close as CloseIcon
 } from '@mui/icons-material';
+import { locationService } from '../services/locationService';
 
 const MotionPaper = motion(Paper);
 
@@ -47,21 +48,7 @@ const AddLocation = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      const token = user?.token;
-      const response = await fetch('http://localhost:8000/api/ubicaciones', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify(formData)
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData?.message || 'Error al crear la ubicación');
-      }
+      await locationService.createLocation(formData);
       setSnackbar({
         open: true,
         message: 'Ubicación creada exitosamente',
@@ -79,7 +66,7 @@ const AddLocation = () => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message: error.message || 'Error al guardar la ubicación',
+        message: error.response?.data?.message || error.message || 'Error al guardar la ubicación',
         severity: 'error'
       });
     }
@@ -108,41 +95,54 @@ const AddLocation = () => {
         onClick={() => setOpen(true)}
         sx={{
           p: 3,
+          height: 140,
           cursor: 'pointer',
           backgroundColor: alpha(theme.palette.info.main, 0.1),
           borderRadius: '16px',
           border: `1px solid ${alpha(theme.palette.info.main, 0.12)}`,
-          transition: 'all 0.3s ease',
+          transition: 'all 0.3s ease-in-out',
           '&:hover': {
             transform: 'translateY(-4px)',
-            boxShadow: `0 10px 24px ${alpha(theme.palette.info.main, 0.2)}`,
+            boxShadow: `0 8px 24px ${alpha(theme.palette.info.main, 0.15)}`,
           },
         }}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          height: '100%',
+          gap: 2
+        }}>
           <Box sx={{
             backgroundColor: alpha(theme.palette.info.main, 0.1),
-            borderRadius: '50%',
+            borderRadius: '12px',
             p: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            <AddLocationAltIcon sx={{ color: theme.palette.info.main, fontSize: 36 }} />
+            <AddLocationAltIcon sx={{ color: theme.palette.info.main, fontSize: 32 }} />
           </Box>
-          <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
+          <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 500 }}>
             Añadir Ubicación
           </Typography>
-      </Box>
+        </Box>
       </MotionPaper>
 
       <Modal
         open={open}
         onClose={() => setOpen(false)}
         closeAfterTransition
-        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}
+        sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          p: { xs: 1, sm: 2 } 
+        }}
       >
         <Fade in={open}>
           <MotionPaper
@@ -151,7 +151,8 @@ const AddLocation = () => {
             exit={{ opacity: 0, y: 20 }}
             sx={{
               width: '100%',
-              maxWidth: 500,
+              maxWidth: { xs: '95vw', sm: 500 },
+              maxHeight: { xs: '90vh', sm: 'auto' },
               bgcolor: 'background.paper',
               borderRadius: '16px',
               boxShadow: '0 12px 32px rgba(0,0,0,0.12)',
@@ -172,7 +173,8 @@ const AddLocation = () => {
                 fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1
+                gap: 1,
+                fontSize: { xs: '1rem', sm: '1.25rem' }
               }}>
                 <LocationOnIcon /> Nueva Ubicación
               </Typography>
@@ -189,7 +191,7 @@ const AddLocation = () => {
               </IconButton>
             </Box>
 
-            <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ p: { xs: 2, sm: 3 } }}>
               {['nombre', 'edificio', 'planta', 'aula'].map((field) => (
               <TextField
                   key={field}

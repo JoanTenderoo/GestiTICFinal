@@ -31,7 +31,8 @@ import {
     useTheme,
     alpha,
     Zoom,
-    Fade
+    Fade,
+    useMediaQuery
 } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,10 +46,9 @@ import {
     Schedule as ScheduleIcon,
     Description as DescriptionIcon
 } from '@mui/icons-material';
-import { incidenceService } from '../services/equipmentService';
+import { equipmentService } from '../services/equipmentService';
 import { locationService } from '../services/locationService';
 import authService from '../services/authService';
-import { equipmentService } from '../services/equipmentService';
 
 const MotionBox = motion(Box);
 const MotionPaper = motion(Paper);
@@ -372,11 +372,13 @@ const IncidenciasTable = () => {
     
     const isAdmin = [user?.rol, user?.usuario?.rol].some(r => r === 'administrador' || r === 'admin');
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
     useEffect(() => {
         const fetchIncidencias = async () => {
             try {
-                const data = await incidenceService.getIncidencias();
+                const data = await equipmentService.getIncidences();
                 setIncidencias(data);
                 setLoading(false);
             } catch (err) {
@@ -402,7 +404,7 @@ const IncidenciasTable = () => {
     useEffect(() => {
         const fetchEquipos = async () => {
             try {
-                const data = await equipmentService.getEquipments();
+                const data = await equipmentService.getEquipment();
                 setEquipos(data);
             } catch (error) {
                 setEquipos([]);
@@ -472,12 +474,12 @@ const IncidenciasTable = () => {
                 ...editForm,
                 fecha_inicio: new Date(editForm.fecha_inicio).toISOString(),
             };
-            await incidenceService.updateIncidence(editForm.id_incidencia, formDataToSend);
+            await equipmentService.updateIncidence(editForm.id_incidencia, formDataToSend);
             setSnackbar({ open: true, message: 'Incidencia actualizada correctamente', severity: 'success' });
             setOpenEditModal(false);
             setEditForm(null);
             // Refrescar incidencias
-            const data = await incidenceService.getIncidencias();
+            const data = await equipmentService.getIncidences();
             setIncidencias(data);
         } catch (error) {
             setSnackbar({ open: true, message: error.message || 'Error al actualizar la incidencia', severity: 'error' });
@@ -500,12 +502,12 @@ const IncidenciasTable = () => {
         if (!incidenciaToDelete) return;
         setSaving(true);
         try {
-            await incidenceService.deleteIncidence(incidenciaToDelete.id_incidencia);
+            await equipmentService.deleteIncidence(incidenciaToDelete.id_incidencia);
             setSnackbar({ open: true, message: 'Incidencia eliminada correctamente', severity: 'success' });
             setOpenDeleteModal(false);
             setIncidenciaToDelete(null);
             // Refrescar incidencias
-            const data = await incidenceService.getIncidencias();
+            const data = await equipmentService.getIncidences();
             setIncidencias(data);
             // Disparar evento de actualización para estadísticas
             window.dispatchEvent(new Event('updateIncidencias'));
@@ -542,12 +544,19 @@ const IncidenciasTable = () => {
 
     // Columnas para DataGrid
     const columns = [
-        { field: 'titulo', headerName: 'Título', flex: 1, minWidth: 150 },
+        { 
+            field: 'titulo', 
+            headerName: 'Título', 
+            flex: 1, 
+            minWidth: 120,
+            hide: false
+        },
         {
             field: 'usuario',
             headerName: 'Usuario',
             flex: 1,
-            minWidth: 120,
+            minWidth: 100,
+            hide: isMobile,
             renderCell: (params) =>
                 params.row && params.row.usuario
                     ? `${params.row.usuario.nombre} ${params.row.usuario.apellidos}`
@@ -557,26 +566,58 @@ const IncidenciasTable = () => {
             field: 'equipo',
             headerName: 'Equipo',
             flex: 1,
-            minWidth: 120,
+            minWidth: 100,
+            hide: isMobile,
             renderCell: (params) =>
                 params.row && params.row.equipamiento
                     ? params.row.equipamiento.modelo
                     : 'N/A'
         },
-        { field: 'descripcion', headerName: 'Descripción', flex: 2, minWidth: 200, renderCell: (params) => (
-            <Tooltip title={params.value}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', maxWidth: 200 }}>{params.value}</span></Tooltip>
-        ) },
-        { field: 'estado', headerName: 'Estado', flex: 1, minWidth: 100, renderCell: (params) => (
-            <Chip label={params.value} color={getEstadoColor(params.value)} size="small" />
-        ) },
-        { field: 'prioridad', headerName: 'Prioridad', flex: 1, minWidth: 100, renderCell: (params) => (
-            <Chip label={params.value} color={getPrioridadColor(params.value)} size="small" />
-        ) },
+        { 
+            field: 'descripcion', 
+            headerName: 'Descripción', 
+            flex: 2, 
+            minWidth: isTablet ? 150 : 200, 
+            hide: isMobile,
+            renderCell: (params) => (
+                <Tooltip title={params.value}>
+                    <span style={{ 
+                        whiteSpace: 'nowrap', 
+                        overflow: 'hidden', 
+                        textOverflow: 'ellipsis', 
+                        display: 'block', 
+                        maxWidth: isTablet ? 150 : 200 
+                    }}>
+                        {params.value}
+                    </span>
+                </Tooltip>
+            ) 
+        },
+        { 
+            field: 'estado', 
+            headerName: 'Estado', 
+            flex: 1, 
+            minWidth: 80, 
+            renderCell: (params) => (
+                <Chip label={params.value} color={getEstadoColor(params.value)} size="small" />
+            ) 
+        },
+        { 
+            field: 'prioridad', 
+            headerName: 'Prioridad', 
+            flex: 1, 
+            minWidth: 80,
+            hide: isMobile,
+            renderCell: (params) => (
+                <Chip label={params.value} color={getPrioridadColor(params.value)} size="small" />
+            ) 
+        },
         {
             field: 'fecha_inicio',
             headerName: 'Fecha',
             flex: 1,
-            minWidth: 110,
+            minWidth: 80,
+            hide: isMobile,
             renderCell: (params) =>
                 params.row && params.row.fecha_inicio
                     ? new Date(params.row.fecha_inicio).toLocaleDateString()
@@ -586,29 +627,29 @@ const IncidenciasTable = () => {
             field: 'acciones',
             headerName: 'Acciones',
             flex: 1,
-            minWidth: 120,
+            minWidth: isMobile ? 80 : 120,
             sortable: false,
             filterable: false,
             renderCell: (params) => {
                 const row = safeRow(params);
                 if (!row) return null;
                 return (
-                <Box display="flex" gap={1}>
+                <Box display="flex" gap={0.5}>
                     <Tooltip title="Ver detalles">
                             <IconButton size="small" onClick={() => handleOpenModal(row)}>
-                            <VisibilityIcon />
+                            <VisibilityIcon fontSize={isMobile ? 'small' : 'medium'} />
                         </IconButton>
                     </Tooltip>
                     {isAdmin && (
                         <>
                             <Tooltip title="Editar">
                                     <IconButton size="small" onClick={() => handleOpenEditModal(row)}>
-                                    <EditIcon />
+                                    <EditIcon fontSize={isMobile ? 'small' : 'medium'} />
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Eliminar">
                                     <IconButton size="small" onClick={() => handleOpenDeleteModal(row)}>
-                                    <DeleteIcon />
+                                    <DeleteIcon fontSize={isMobile ? 'small' : 'medium'} />
                                 </IconButton>
                             </Tooltip>
                         </>
@@ -636,11 +677,12 @@ const IncidenciasTable = () => {
     }
 
     return (
-        <StyledBox>
+        <StyledBox sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <MotionBox
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
+                sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
             >
             <Typography variant="h6" className="incidencias-title" gutterBottom>
                 Incidencias Registradas
@@ -655,7 +697,7 @@ const IncidenciasTable = () => {
                     fullWidth
                 />
             </Box>
-            <Box sx={{ height: 420, width: '100%' }}>
+            <Box sx={{ width: '100%', flexGrow: 1, minHeight: 0 }}>
                 <DataGrid
                     rows={filteredIncidencias}
                     columns={columns}
@@ -664,24 +706,50 @@ const IncidenciasTable = () => {
                     rowsPerPageOptions={[8, 16, 32]}
                     disableSelectionOnClick
                     components={{ Toolbar: GridToolbar }}
-                        localeText={{ 
-                            toolbarColumns: 'Columnas', 
-                            toolbarFilters: 'Filtros', 
-                            toolbarDensity: 'Densidad', 
-                            toolbarExport: 'Exportar' 
-                        }}
-                        sx={{
-                            '& .MuiDataGrid-toolbarContainer': {
-                                padding: '8px 16px',
-                                backgroundColor: 'transparent'
-                            },
-                            '& .MuiButton-root': {
-                                color: theme.palette.primary.main,
-                                '&:hover': {
-                                    backgroundColor: alpha(theme.palette.primary.main, 0.04)
-                                }
+                    autoHeight={false}
+                    localeText={{ 
+                        noRowsLabel: 'Todavía no hay datos',
+                        toolbarColumns: 'Columnas', 
+                        toolbarFilters: 'Filtros', 
+                        toolbarDensity: 'Densidad', 
+                        toolbarExport: 'Exportar' 
+                    }}
+                    sx={{
+                        height: '100%',
+                        '& .MuiDataGrid-toolbarContainer': {
+                            padding: '8px 16px',
+                            backgroundColor: 'transparent'
+                        },
+                        '& .MuiButton-root': {
+                            color: theme.palette.primary.main,
+                            '&:hover': {
+                                backgroundColor: alpha(theme.palette.primary.main, 0.04)
                             }
-                        }}
+                        },
+                        '& .MuiDataGrid-cell': {
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            textAlign: 'center'
+                        },
+                        '& .MuiDataGrid-cell[data-field="acciones"]': {
+                            justifyContent: 'center'
+                        },
+                        '& .MuiDataGrid-columnHeaderTitle': {
+                            textAlign: 'center',
+                            width: '100%'
+                        },
+                        '& .MuiDataGrid-columnHeader': {
+                            display: 'flex',
+                            justifyContent: 'center'
+                        },
+                        '& .MuiDataGrid-overlay': {
+                            backgroundColor: 'transparent'
+                        },
+                        '& .MuiDataGrid-footerContainer': {
+                            borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                        }
+                    }}
                 />
             </Box>
             </MotionBox>

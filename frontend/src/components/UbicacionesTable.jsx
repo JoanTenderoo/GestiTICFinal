@@ -16,7 +16,8 @@ import {
     Typography,
     useTheme,
     alpha,
-    styled
+    styled,
+    useMediaQuery
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { motion } from 'framer-motion';
@@ -108,6 +109,7 @@ const UbicacionesTable = () => {
     const user = authService.getCurrentUser();
     const isAdmin = [user?.rol, user?.usuario?.rol].some(r => r === 'administrador' || r === 'admin');
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => {
         const fetchUbicaciones = async () => {
@@ -212,31 +214,48 @@ const UbicacionesTable = () => {
     const columns = useMemo(() => {
         const baseColumns = [
             { field: 'nombre', headerName: 'Nombre', flex: 1, minWidth: 120 },
-            { field: 'edificio', headerName: 'Edificio', flex: 1, minWidth: 100 },
-            { field: 'planta', headerName: 'Planta', flex: 1, minWidth: 100 },
-            { field: 'aula', headerName: 'Aula', flex: 1, minWidth: 100 },
-            { field: 'observaciones', headerName: 'Observaciones', flex: 2, minWidth: 180, renderCell: (params) => (
-                <Tooltip title={params.value || ''}><span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', maxWidth: 180 }}>{params.value}</span></Tooltip>
-            ) }
+            { field: 'edificio', headerName: 'Edificio', flex: 1, minWidth: 100, hide: isMobile },
+            { field: 'planta', headerName: 'Planta', flex: 1, minWidth: 80, hide: isMobile },
+            { field: 'aula', headerName: 'Aula', flex: 1, minWidth: 80 },
+            { 
+                field: 'observaciones', 
+                headerName: 'Observaciones', 
+                flex: 2, 
+                minWidth: isMobile ? 120 : 180, 
+                hide: isMobile,
+                renderCell: (params) => (
+                    <Tooltip title={params.value || ''}>
+                        <span style={{ 
+                            whiteSpace: 'nowrap', 
+                            overflow: 'hidden', 
+                            textOverflow: 'ellipsis', 
+                            display: 'block', 
+                            maxWidth: isMobile ? 120 : 180 
+                        }}>
+                            {params.value}
+                        </span>
+                    </Tooltip>
+                ) 
+            }
         ];
         if (isAdmin) {
             baseColumns.push({
                 field: 'acciones',
                 headerName: 'Acciones',
                 flex: 1,
-                minWidth: 120,
+                minWidth: isMobile ? 80 : 120,
                 sortable: false,
                 filterable: false,
                 renderCell: (params) => (
-                    <Box display="flex" gap={1}>
+                    <Box display="flex" gap={isMobile ? 0.5 : 1}>
                         <Tooltip title="Editar">
                             <IconButton size="small" onClick={() => handleOpenEditModal(params.row)}>
-                                <EditIcon />
+                                <EditIcon fontSize={isMobile ? 'small' : 'medium'} />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Eliminar">
                             <IconButton size="small" onClick={() => handleOpenDeleteModal(params.row)}>
-                                <DeleteIcon />
+                                <DeleteIcon fontSize={isMobile ? 'small' : 'medium'} />
                             </IconButton>
                         </Tooltip>
                     </Box>
@@ -244,7 +263,7 @@ const UbicacionesTable = () => {
             });
         }
         return baseColumns;
-    }, [isAdmin]);
+    }, [isAdmin, isMobile]);
 
     const filteredUbicaciones = useMemo(() => {
         if (!searchText) return ubicaciones;
@@ -274,11 +293,12 @@ const UbicacionesTable = () => {
     }
 
     return (
-        <StyledBox>
+        <StyledBox sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <MotionBox
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
+                sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
             >
                 <Typography variant="h6" className="ubicaciones-title" gutterBottom>
                     Ubicaciones Registradas
@@ -293,7 +313,7 @@ const UbicacionesTable = () => {
                     fullWidth
                 />
             </Box>
-                <Box sx={{ height: 420, width: '100%' }}>
+                <Box sx={{ width: '100%', flexGrow: 1, minHeight: 0 }}>
             <DataGrid
                 rows={filteredUbicaciones}
                 columns={columns}
@@ -301,19 +321,51 @@ const UbicacionesTable = () => {
                 pageSize={8}
                 rowsPerPageOptions={[8, 16, 32]}
                 disableSelectionOnClick
-                        sx={{
-                            '& .MuiDataGrid-toolbarContainer': {
-                                padding: '8px 16px',
-                                backgroundColor: 'transparent'
-                            },
-                            '& .MuiButton-root': {
-                                color: theme.palette.primary.main,
-                                '&:hover': {
-                                    backgroundColor: alpha(theme.palette.primary.main, 0.04)
-                                }
-                            }
-                        }}
-                    />
+                autoHeight={false}
+                localeText={{
+                    noRowsLabel: 'Todavía no hay datos',
+                    toolbarColumns: 'Columnas', 
+                    toolbarFilters: 'Filtros', 
+                    toolbarDensidad: 'Densidad', 
+                    toolbarExport: 'Exportar' 
+                }}
+                sx={{
+                    height: '100%',
+                    '& .MuiDataGrid-toolbarContainer': {
+                        padding: '8px 16px',
+                        backgroundColor: 'transparent'
+                    },
+                    '& .MuiButton-root': {
+                        color: theme.palette.primary.main,
+                        '&:hover': {
+                            backgroundColor: alpha(theme.palette.primary.main, 0.04)
+                        }
+                    },
+                    '& .MuiDataGrid-cell': {
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center'
+                    },
+                    '& .MuiDataGrid-cell[data-field="acciones"]': {
+                        justifyContent: 'center'
+                    },
+                    '& .MuiDataGrid-columnHeaderTitle': {
+                        textAlign: 'center',
+                        width: '100%'
+                    },
+                    '& .MuiDataGrid-columnHeader': {
+                        display: 'flex',
+                        justifyContent: 'center'
+                    },
+                    '& .MuiDataGrid-overlay': {
+                        backgroundColor: 'transparent'
+                    },
+                    '& .MuiDataGrid-footerContainer': {
+                        borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                    }
+                }}
+            />
                 </Box>
             </MotionBox>
 

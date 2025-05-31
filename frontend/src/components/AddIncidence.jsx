@@ -6,8 +6,7 @@ import {
 import { motion } from 'framer-motion';
 import WarningIcon from '@mui/icons-material/Warning';
 import CloseIcon from '@mui/icons-material/Close';
-import '../styles/AddLocation.css';
-import { equipmentService, incidenceService } from '../services/equipmentService';
+import { equipmentService } from '../services/equipmentService';
 import authService from '../services/authService';
 
 const MotionPaper = motion(Paper);
@@ -48,7 +47,7 @@ const AddIncidence = () => {
   useEffect(() => {
     const fetchEquipos = async () => {
       try {
-        const data = await equipmentService.getEquipments();
+        const data = await equipmentService.getEquipment();
         setEquipos(data);
       } catch (error) {
         setEquipos([]);
@@ -73,21 +72,7 @@ const AddIncidence = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      const token = user?.token;
-      const response = await fetch('http://localhost:8000/api/incidencias', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify(formData)
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData?.message || JSON.stringify(errorData) || 'Error al crear la incidencia');
-      }
+      await equipmentService.createIncidence(formData);
       setSnackbar({
         open: true,
         message: 'Incidencia creada exitosamente',
@@ -108,7 +93,7 @@ const AddIncidence = () => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message: error.message || 'Error al guardar la incidencia',
+        message: error.response?.data?.message || error.message || 'Error al guardar la incidencia',
         severity: 'error'
       });
     }
@@ -121,9 +106,9 @@ const AddIncidence = () => {
         onClick={() => setOpen(true)}
         sx={{
           p: 3,
-          height: '100%',
+          height: 140,
           cursor: 'pointer',
-          background: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.08)} 0%, ${alpha(theme.palette.warning.main, 0.12)} 100%)`,
+          backgroundColor: alpha(theme.palette.warning.main, 0.1),
           borderRadius: '16px',
           border: `1px solid ${alpha(theme.palette.warning.main, 0.12)}`,
           transition: 'all 0.3s ease-in-out',
@@ -167,7 +152,7 @@ const AddIncidence = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          p: 2
+          p: { xs: 1, sm: 2 }
         }}
       >
         <Fade in={open}>
@@ -177,7 +162,8 @@ const AddIncidence = () => {
             exit={{ opacity: 0, y: 20 }}
             sx={{
               width: '100%',
-              maxWidth: 500,
+              maxWidth: { xs: '95vw', sm: 500 },
+              maxHeight: { xs: '90vh', sm: 'auto' },
               bgcolor: 'background.paper',
               borderRadius: '16px',
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
@@ -185,7 +171,7 @@ const AddIncidence = () => {
             }}
           >
             <Box sx={{
-              p: 3,
+              p: { xs: 2, sm: 3 },
               borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               display: 'flex',
               alignItems: 'center',
@@ -197,7 +183,8 @@ const AddIncidence = () => {
                 fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1
+                gap: 1,
+                fontSize: { xs: '1rem', sm: '1.25rem' }
               }}>
                 <WarningIcon /> Nueva Incidencia
               </Typography>
@@ -214,7 +201,7 @@ const AddIncidence = () => {
               </IconButton>
             </Box>
 
-            <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ p: { xs: 2, sm: 3 } }}>
               <FormControl fullWidth margin="normal" required>
                 <InputLabel id="equipo-label">Equipo</InputLabel>
                 <Select
@@ -277,27 +264,20 @@ const AddIncidence = () => {
                 }}
               />
 
-              <FormControl fullWidth margin="normal" required>
-                <InputLabel>Estado</InputLabel>
-                <Select
-                  name="estado"
-                  value={formData.estado}
-                  onChange={handleChange}
-                  label="Estado"
-                  sx={{
+              <TextField
+                fullWidth
+                label="Estado"
+                value="Pendiente"
+                margin="normal"
+                disabled
+                helperText="El estado de las nuevas incidencias es siempre 'Pendiente'"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
                     borderRadius: '8px',
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: theme.palette.warning.main
-                    }
-                  }}
-                >
-                  {estados.map((estado) => (
-                    <MenuItem key={estado} value={estado}>
-                      {estado.charAt(0).toUpperCase() + estado.slice(1)}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                    backgroundColor: alpha(theme.palette.warning.main, 0.05)
+                  }
+                }}
+              />
 
               <FormControl fullWidth margin="normal" required>
                 <InputLabel>Prioridad</InputLabel>

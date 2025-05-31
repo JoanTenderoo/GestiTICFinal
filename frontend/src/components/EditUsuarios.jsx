@@ -286,9 +286,9 @@ const EditUsuarios = () => {
         onClick={handleOpen}
         sx={{
           p: 3,
-          height: '100%',
+          height: 140,
           cursor: 'pointer',
-          background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.08)} 0%, ${alpha(theme.palette.info.main, 0.12)} 100%)`,
+          backgroundColor: alpha(theme.palette.info.main, 0.1),
           borderRadius: '16px',
           border: `1px solid ${alpha(theme.palette.info.main, 0.12)}`,
           transition: 'all 0.3s ease-in-out',
@@ -402,6 +402,7 @@ const EditUsuarios = () => {
                 hideFooterSelectedRowCount
                 components={{ Toolbar: GridToolbar }}
                 localeText={{ 
+                  noRowsLabel: 'Todavía no hay datos',
                   toolbarColumns: 'Columnas', 
                   toolbarFilters: 'Filtros', 
                   toolbarDensity: 'Densidad', 
@@ -425,6 +426,26 @@ const EditUsuarios = () => {
                   },
                   '& .MuiDataGrid-virtualScroller': {
                     minHeight: '300px',
+                  },
+                  '& .MuiDataGrid-cell': {
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center'
+                  },
+                  '& .MuiDataGrid-cell[data-field="acciones"]': {
+                    justifyContent: 'center'
+                  },
+                  '& .MuiDataGrid-columnHeaderTitle': {
+                    textAlign: 'center',
+                    width: '100%'
+                  },
+                  '& .MuiDataGrid-columnHeader': {
+                    display: 'flex',
+                    justifyContent: 'center'
+                  },
+                  '& .MuiDataGrid-overlay': {
+                    backgroundColor: 'transparent'
                   }
                 }}
               />

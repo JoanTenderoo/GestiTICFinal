@@ -1,0 +1,83 @@
+{
+  "name": "GestiTIC - Sistema de Gestión IT",
+  "short_name": "GestiTIC",
+  "description": "GestiTIC es un sistema integral de gestión de equipamiento informático, ubicaciones e incidencias técnicas. Desarrollado por Joan Tendero para optimizar la administración IT.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f8fa",
+  "theme_color": "#1976d2",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Gestión de Incidencias",
+      "short_name": "Incidencias",
+      "description": "Administrar y resolver incidencias técnicas",
+      "url": "/dashboard?view=incidencias",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "any"
+        }
+      ]
+    },
+    {
+      "name": "Inventario de Equipamiento",
+      "short_name": "Equipos",
+      "description": "Gestionar el inventario de equipos IT",
+      "url": "/dashboard?view=equipamiento",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "any"
+        }
+      ]
+    },
+    {
+      "name": "Administrar Ubicaciones",
+      "short_name": "Ubicaciones",
+      "description": "Gestionar edificios, plantas y aulas",
+      "url": "/dashboard?view=ubicaciones",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "any"
+        }
+      ]
+    },
+    {
+      "name": "Panel de Control",
+      "short_name": "Dashboard",
+      "description": "Vista general del sistema GestiTIC",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "any"
+        }
+      ]
+    }
+  ]
+} 

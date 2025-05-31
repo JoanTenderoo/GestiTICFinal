@@ -1,7 +1,18 @@
 import api from './api';
 
 export const equipmentService = {
-  getEquipments: async () => {
+  // Crear nuevo equipamiento
+  createEquipment: async (equipmentData) => {
+    try {
+      const response = await api.post('/equipamiento', equipmentData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Obtener todo el equipamiento
+  getEquipment: async () => {
     try {
       const response = await api.get('/equipamiento');
       return response.data;
@@ -10,6 +21,27 @@ export const equipmentService = {
     }
   },
 
+  // Obtener equipamiento por ID
+  getEquipmentById: async (id) => {
+    try {
+      const response = await api.get(`/equipamiento/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Actualizar equipamiento
+  updateEquipment: async (id, equipmentData) => {
+    try {
+      const response = await api.put(`/equipamiento/${id}`, equipmentData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Eliminar equipamiento
   deleteEquipment: async (id) => {
     try {
       const response = await api.delete(`/equipamiento/${id}`);
@@ -19,17 +51,7 @@ export const equipmentService = {
     }
   },
 
-  updateEquipment: async (id, equipmentData) => {
-    try {
-      const response = await api.put(`/equipamiento/${id}`, equipmentData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  }
-};
-
-export const incidenceService = {
+  // Crear nueva incidencia
   createIncidence: async (incidenceData) => {
     try {
       const response = await api.post('/incidencias', incidenceData);
@@ -39,7 +61,8 @@ export const incidenceService = {
     }
   },
 
-  getIncidencias: async () => {
+  // Obtener todas las incidencias
+  getIncidences: async () => {
     try {
       const response = await api.get('/incidencias');
       return response.data;
@@ -48,6 +71,7 @@ export const incidenceService = {
     }
   },
 
+  // Actualizar incidencia
   updateIncidence: async (id, incidenceData) => {
     try {
       const response = await api.put(`/incidencias/${id}`, incidenceData);
@@ -57,6 +81,7 @@ export const incidenceService = {
     }
   },
 
+  // Eliminar incidencia
   deleteIncidence: async (id) => {
     try {
       const response = await api.delete(`/incidencias/${id}`);

@@ -90,7 +90,7 @@ const RegisterPage = () => {
         alignItems: 'center',
         minHeight: '100vh',
         background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)} 0%, ${alpha(theme.palette.primary.dark, 0.1)} 100%)`,
-        padding: 2
+        padding: { xs: 1, sm: 2 }
       }}
     >
       <MotionPaper
@@ -100,21 +100,23 @@ const RegisterPage = () => {
         elevation={8}
         sx={{
           display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
           width: '100%',
-          maxWidth: '1000px',
-          minHeight: '600px',
+          maxWidth: { xs: '400px', sm: '500px', md: '1000px' },
+          minHeight: { xs: 'auto', md: '600px' },
           borderRadius: '16px',
           overflow: 'hidden'
         }}
       >
         <Box
           sx={{
-            width: '40%',
+            width: { xs: '100%', md: '40%' },
             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-            display: { xs: 'none', md: 'flex' },
+            display: { xs: 'flex', md: 'flex' },
             justifyContent: 'center',
             alignItems: 'center',
-            padding: 4
+            padding: { xs: 2, md: 4 },
+            minHeight: { xs: '120px', md: 'auto' }
           }}
         >
           <motion.img
@@ -124,7 +126,8 @@ const RegisterPage = () => {
             src={logo}
             alt="Logo"
             style={{
-              width: '180px',
+              width: '100%',
+              maxWidth: '180px',
               height: 'auto',
               filter: 'brightness(0) invert(1)'
             }}

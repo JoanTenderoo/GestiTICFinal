@@ -6,8 +6,8 @@ import {
 import { motion } from 'framer-motion';
 import ComputerIcon from '@mui/icons-material/Computer';
 import CloseIcon from '@mui/icons-material/Close';
-import '../styles/AddLocation.css';
 import { locationService } from '../services/locationService';
+import { equipmentService } from '../services/equipmentService';
 
 const MotionPaper = motion(Paper);
 
@@ -29,6 +29,7 @@ const AddEquipment = () => {
     observaciones: ''
   });
   const [ubicaciones, setUbicaciones] = useState([]);
+  const [loadingUbicaciones, setLoadingUbicaciones] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -37,15 +38,29 @@ const AddEquipment = () => {
 
   useEffect(() => {
     const fetchUbicaciones = async () => {
+      setLoadingUbicaciones(true);
       try {
+        console.log('Cargando ubicaciones...');
         const data = await locationService.getLocations();
-        setUbicaciones(data);
+        console.log('Ubicaciones cargadas:', data);
+        setUbicaciones(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Error al cargar ubicaciones:', error);
+        setUbicaciones([]);
+        setSnackbar({
+          open: true,
+          message: 'Error al cargar ubicaciones: ' + (error.message || 'Error desconocido'),
+          severity: 'error'
+        });
+      } finally {
+        setLoadingUbicaciones(false);
       }
     };
-    fetchUbicaciones();
-  }, []);
+    
+    if (open) {
+      fetchUbicaciones();
+    }
+  }, [open]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,21 +78,7 @@ const AddEquipment = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      const token = user?.token;
-      const response = await fetch('http://localhost:8000/api/equipamiento', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify(formData)
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData?.message || JSON.stringify(errorData) || 'Error al crear el equipamiento');
-      }
+      await equipmentService.createEquipment(formData);
       setSnackbar({
         open: true,
         message: 'Equipamiento creado exitosamente',
@@ -95,7 +96,7 @@ const AddEquipment = () => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message: error.message || 'Error al guardar el equipamiento',
+        message: error.response?.data?.message || error.message || 'Error al guardar el equipamiento',
         severity: 'error'
       });
     }
@@ -108,7 +109,7 @@ const AddEquipment = () => {
         onClick={() => setOpen(true)}
         sx={{
           p: 3,
-          height: '100%',
+          height: 140,
           cursor: 'pointer',
           backgroundColor: alpha(theme.palette.success.main, 0.1),
           borderRadius: '16px',
@@ -154,7 +155,7 @@ const AddEquipment = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          p: 2
+          p: { xs: 1, sm: 2 }
         }}
       >
         <Fade in={open}>
@@ -164,7 +165,8 @@ const AddEquipment = () => {
             exit={{ opacity: 0, y: 20 }}
             sx={{
               width: '100%',
-              maxWidth: 500,
+              maxWidth: { xs: '95vw', sm: 500 },
+              maxHeight: { xs: '90vh', sm: 'auto' },
               bgcolor: 'background.paper',
               borderRadius: '16px',
               boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
@@ -172,7 +174,7 @@ const AddEquipment = () => {
             }}
           >
             <Box sx={{
-              p: 3,
+              p: { xs: 2, sm: 3 },
               borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               display: 'flex',
               alignItems: 'center',
@@ -185,9 +187,9 @@ const AddEquipment = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
-                fontSize: '1.2rem'
+                fontSize: { xs: '1rem', sm: '1.2rem' }
               }}>
-                <ComputerIcon sx={{ fontSize: '1.5rem' }} /> Nuevo Equipamiento
+                <ComputerIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} /> Nuevo Equipamiento
               </Typography>
               <IconButton 
                 onClick={() => setOpen(false)}
@@ -198,11 +200,11 @@ const AddEquipment = () => {
                   }
                 }}
               >
-                <CloseIcon sx={{ fontSize: '1.5rem' }} />
+                <CloseIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />
               </IconButton>
             </Box>
 
-            <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ p: { xs: 2, sm: 3 } }}>
               <FormControl fullWidth margin="normal" required>
                 <InputLabel id="ubicacion-label">Ubicación</InputLabel>
                 <Select
@@ -211,11 +213,22 @@ const AddEquipment = () => {
                   value={formData.id_ubicacion}
                   label="Ubicación"
                   onChange={handleChange}
+                  disabled={loadingUbicaciones}
                 >
                   <MenuItem value=""><em>Ninguna</em></MenuItem>
-                  {ubicaciones.map((ubicacion) => (
+                  {loadingUbicaciones && (
+                    <MenuItem disabled>
+                      <em>Cargando ubicaciones...</em>
+                    </MenuItem>
+                  )}
+                  {!loadingUbicaciones && ubicaciones.length === 0 && (
+                    <MenuItem disabled>
+                      <em>No hay ubicaciones disponibles. Crea una ubicación primero.</em>
+                    </MenuItem>
+                  )}
+                  {!loadingUbicaciones && ubicaciones.length > 0 && ubicaciones.map((ubicacion) => (
                     <MenuItem key={ubicacion.id_ubicacion} value={ubicacion.id_ubicacion}>
-                      {ubicacion.nombre}
+                      {ubicacion.nombre} - {ubicacion.edificio} ({ubicacion.aula})
                     </MenuItem>
                   ))}
                 </Select>
