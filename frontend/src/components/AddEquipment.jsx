@@ -40,12 +40,9 @@ const AddEquipment = () => {
     const fetchUbicaciones = async () => {
       setLoadingUbicaciones(true);
       try {
-        console.log('Cargando ubicaciones...');
         const data = await locationService.getLocations();
-        console.log('Ubicaciones cargadas:', data);
         setUbicaciones(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error('Error al cargar ubicaciones:', error);
         setUbicaciones([]);
         setSnackbar({
           open: true,

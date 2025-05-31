@@ -14,8 +14,7 @@ const MotionPaper = motion(Paper);
 const estados = [
   'pendiente',
   'en_proceso',
-  'resuelta',
-  'cerrada'
+  'resuelta'
 ];
 const prioridades = [
   'baja',

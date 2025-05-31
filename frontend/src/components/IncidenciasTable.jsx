@@ -148,8 +148,7 @@ const IconWrapper = styled(Box)(({ theme }) => ({
 const estados = [
     'pendiente',
     'en_proceso',
-    'resuelta',
-    'cerrada'
+    'resuelta'
 ];
 const prioridades = [
     'baja',
@@ -1073,11 +1072,9 @@ const IncidenciasTable = () => {
                                         label="Estado"
                                         onChange={handleEditChange}
                                     >
-                                        {estados.map((estado) => (
-                                            <MenuItem key={estado} value={estado}>
-                                                {estado.charAt(0).toUpperCase() + estado.slice(1)}
-                                            </MenuItem>
-                                        ))}
+                                        <MenuItem value="pendiente">Pendiente</MenuItem>
+                                        <MenuItem value="en_proceso">En Proceso</MenuItem>
+                                        <MenuItem value="resuelta">Resuelta</MenuItem>
                                     </Select>
                                 </AnimatedFormControl>
 

@@ -21,9 +21,19 @@ class EquipamientoController extends Controller
             'estado' => 'required|string|in:operativo,averiado,reparacion,retirado',
             'observaciones' => 'nullable|string'
         ], [
-            'numero_serie.unique' => 'Ya existe un equipo con este número de serie.',
+            'id_ubicacion.required' => 'La ubicación es obligatoria.',
             'id_ubicacion.exists' => 'La ubicación seleccionada no existe.',
-            'estado.in' => 'El estado debe ser: operativo, averiado, reparación o retirado.'
+            'modelo.required' => 'El modelo es obligatorio.',
+            'modelo.string' => 'El modelo debe ser un texto válido.',
+            'modelo.max' => 'El modelo no puede tener más de 100 caracteres.',
+            'numero_serie.required' => 'El número de serie es obligatorio.',
+            'numero_serie.string' => 'El número de serie debe ser un texto válido.',
+            'numero_serie.max' => 'El número de serie no puede tener más de 50 caracteres.',
+            'numero_serie.unique' => 'Ya existe un equipo con este número de serie.',
+            'estado.required' => 'El estado es obligatorio.',
+            'estado.string' => 'El estado debe ser un texto válido.',
+            'estado.in' => 'El estado debe ser: operativo, averiado, reparación o retirado.',
+            'observaciones.string' => 'Las observaciones deben ser un texto válido.'
         ]);
 
         $equipamiento = Equipamiento::create($request->all());
@@ -44,9 +54,15 @@ class EquipamientoController extends Controller
             'estado' => 'string|in:operativo,averiado,reparacion,retirado',
             'observaciones' => 'nullable|string'
         ], [
-            'numero_serie.unique' => 'Ya existe un equipo con este número de serie.',
             'id_ubicacion.exists' => 'La ubicación seleccionada no existe.',
-            'estado.in' => 'El estado debe ser: operativo, averiado, reparación o retirado.'
+            'modelo.string' => 'El modelo debe ser un texto válido.',
+            'modelo.max' => 'El modelo no puede tener más de 100 caracteres.',
+            'numero_serie.string' => 'El número de serie debe ser un texto válido.',
+            'numero_serie.max' => 'El número de serie no puede tener más de 50 caracteres.',
+            'numero_serie.unique' => 'Ya existe un equipo con este número de serie.',
+            'estado.string' => 'El estado debe ser un texto válido.',
+            'estado.in' => 'El estado debe ser: operativo, averiado, reparación o retirado.',
+            'observaciones.string' => 'Las observaciones deben ser un texto válido.'
         ]);
 
         $equipamiento->update($request->all());

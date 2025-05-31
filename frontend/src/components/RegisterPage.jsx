@@ -40,9 +40,76 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  // Función para validar campos en tiempo real
+  const validateField = (name, value) => {
+    let error = '';
+    
+    switch (name) {
+      case 'nombre':
+        if (!value.trim()) {
+          error = 'El nombre es obligatorio.';
+        } else if (value.length > 255) {
+          error = 'El nombre no puede tener más de 255 caracteres.';
+        }
+        break;
+        
+      case 'apellidos':
+        if (!value.trim()) {
+          error = 'Los apellidos son obligatorios.';
+        } else if (value.length > 255) {
+          error = 'Los apellidos no pueden tener más de 255 caracteres.';
+        }
+        break;
+        
+      case 'email':
+        if (!value.trim()) {
+          error = 'El email es obligatorio.';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = 'El email debe tener un formato válido.';
+        }
+        break;
+        
+      case 'password':
+        if (!value) {
+          error = 'La contraseña es obligatoria.';
+        } else if (value.length < 8) {
+          error = 'La contraseña debe tener al menos 8 caracteres.';
+        }
+        break;
+        
+      case 'password_confirmation':
+        if (!value) {
+          error = 'La confirmación de contraseña es obligatoria.';
+        } else if (value !== formData.password) {
+          error = 'La confirmación de contraseña no coincide.';
+        }
+        break;
+    }
+    
+    return error;
+  };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    // Validar el campo en tiempo real
+    const fieldError = validateField(name, value);
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: fieldError
+    }));
+    
+    // Si es confirmación de contraseña, también revalidar la contraseña
+    if (name === 'password' && formData.password_confirmation) {
+      const confirmError = validateField('password_confirmation', formData.password_confirmation);
+      setFieldErrors(prev => ({
+        ...prev,
+        password_confirmation: confirmError
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -50,8 +117,25 @@ const RegisterPage = () => {
     setError('');
     setLoading(true);
 
+    // Validar todos los campos antes de enviar
+    const errors = {};
+    Object.keys(formData).forEach(field => {
+      const fieldError = validateField(field, formData[field]);
+      if (fieldError) {
+        errors[field] = fieldError;
+      }
+    });
+
+    // Validación adicional de confirmación de contraseña
     if (formData.password !== formData.password_confirmation) {
-      setError('Las contraseñas no coinciden');
+      errors.password_confirmation = 'La confirmación de contraseña no coincide.';
+    }
+
+    // Si hay errores, mostrarlos y no enviar
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      const firstError = Object.values(errors)[0];
+      setError(firstError);
       setLoading(false);
       return;
     }
@@ -195,6 +279,8 @@ const RegisterPage = () => {
                 onChange={handleChange}
                 required
                 fullWidth
+                error={!!fieldErrors.nombre}
+                helperText={fieldErrors.nombre}
                 sx={inputStyles}
                 InputProps={{
                   startAdornment: (
@@ -212,6 +298,8 @@ const RegisterPage = () => {
                 onChange={handleChange}
                 required
                 fullWidth
+                error={!!fieldErrors.apellidos}
+                helperText={fieldErrors.apellidos}
                 sx={inputStyles}
                 InputProps={{
                   startAdornment: (
@@ -231,6 +319,8 @@ const RegisterPage = () => {
               onChange={handleChange}
               required
               fullWidth
+              error={!!fieldErrors.email}
+              helperText={fieldErrors.email}
               sx={inputStyles}
               InputProps={{
                 startAdornment: (
@@ -256,6 +346,8 @@ const RegisterPage = () => {
                 onChange={handleChange}
                 required
                 fullWidth
+                error={!!fieldErrors.password}
+                helperText={fieldErrors.password}
                 sx={inputStyles}
                 InputProps={{
                   startAdornment: (
@@ -284,6 +376,8 @@ const RegisterPage = () => {
                 onChange={handleChange}
                 required
                 fullWidth
+                error={!!fieldErrors.password_confirmation}
+                helperText={fieldErrors.password_confirmation}
                 sx={inputStyles}
                 InputProps={{
                   startAdornment: (

@@ -1,3 +1,13 @@
+/**
+ * COMPONENTE DASHBOARD - Pantalla principal del sistema
+ * 
+ * Este es el componente principal que muestra:
+ * - Estadísticas del sistema (tarjetas con números)
+ * - Sidebar de navegación
+ * - Tablas dinámicas según la sección seleccionada
+ * - Botones para crear nuevos elementos (solo admin)
+ */
+
 import React from 'react';
 import { Box, Grid, Paper, Typography, useTheme, alpha, Container } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -31,6 +41,15 @@ const updateEvents = {
 const MotionPaper = motion(Paper);
 const MotionBox = motion(Box);
 
+/**
+ * COMPONENTE STATSCARD - Tarjeta de estadísticas
+ * Muestra un número animado con icono y color temático
+ * 
+ * @param {string} title - Título de la estadística
+ * @param {number} value - Valor numérico a mostrar
+ * @param {JSX.Element} icon - Icono a mostrar
+ * @param {string} color - Color de fondo de la tarjeta
+ */
 const StatsCard = ({ title, value, icon, color }) => {
     const theme = useTheme();
     
@@ -137,6 +156,10 @@ const StatsCard = ({ title, value, icon, color }) => {
 );
 };
 
+/**
+ * COMPONENTE PRINCIPAL DASHBOARD
+ * Gestiona todo el estado y la lógica de la pantalla principal
+ */
 const Dashboard = () => {
     const navigate = useNavigate();
     const theme = useTheme();
@@ -167,7 +190,7 @@ const Dashboard = () => {
                 equipamiento: equipamiento.length
             });
         } catch (error) {
-            console.error('Error al cargar estadísticas:', error);
+            // Error handled silently - stats will remain at default values
         }
     };
 

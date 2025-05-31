@@ -243,7 +243,7 @@ const Sidebar = ({ user, onSelectView, selectedView }) => {
                         fontSize: { xs: '0.6rem', lg: '0.75rem' }
                     }}
                 >
-                    © 2024 GestiTIC v1.0
+                    © 2025 GestiTIC v1.0
                 </Typography>
             </Box>
         </Box>

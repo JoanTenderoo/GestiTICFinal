@@ -5,6 +5,63 @@ const API_URL = 'https://gestitic.com/api';
 // Configurar axios para incluir credenciales en todas las peticiones
 axios.defaults.withCredentials = true;
 
+// Diccionario de traducciones de mensajes de error
+const errorTranslations = {
+    // Validaciones de contraseña
+    'The password field must be at least 8 characters.': 'La contraseña debe tener al menos 8 caracteres.',
+    'The password field is required.': 'La contraseña es obligatoria.',
+    'The password field confirmation does not match.': 'La confirmación de contraseña no coincide.',
+    'The password must be at least 8 characters.': 'La contraseña debe tener al menos 8 caracteres.',
+    'The password confirmation does not match.': 'La confirmación de contraseña no coincide.',
+    
+    // Validaciones de email
+    'The email field is required.': 'El email es obligatorio.',
+    'The email field must be a valid email address.': 'El email debe tener un formato válido.',
+    'The email has already been taken.': 'Este email ya está registrado en el sistema.',
+    'The email must be a valid email address.': 'El email debe tener un formato válido.',
+    
+    // Validaciones de nombre
+    'The name field is required.': 'El nombre es obligatorio.',
+    'The nombre field is required.': 'El nombre es obligatorio.',
+    'The apellidos field is required.': 'Los apellidos son obligatorios.',
+    
+    // Validaciones generales
+    'The given data was invalid.': 'Los datos proporcionados no son válidos.',
+    'Validation failed': 'Error de validación',
+    'These credentials do not match our records.': 'Las credenciales proporcionadas son incorrectas.',
+    'The provided credentials are incorrect.': 'Las credenciales proporcionadas son incorrectas.',
+    
+    // Validaciones de equipamiento
+    'The numero serie has already been taken.': 'Ya existe un equipo con este número de serie.',
+    'The id ubicacion field is required.': 'La ubicación es obligatoria.',
+    'The modelo field is required.': 'El modelo es obligatorio.',
+    'The estado field is required.': 'El estado es obligatorio.',
+    
+    // Otros mensajes comunes
+    'Network Error': 'Error de conexión. Verifica tu conexión a internet.',
+    'Server Error': 'Error del servidor. Inténtalo más tarde.',
+    'Unauthorized': 'No tienes autorización para realizar esta acción.'
+};
+
+// Función para traducir mensajes de error
+const translateError = (message) => {
+    if (typeof message !== 'string') return message;
+    
+    // Buscar traducción exacta
+    if (errorTranslations[message]) {
+        return errorTranslations[message];
+    }
+    
+    // Buscar traducciones por patrones
+    for (const [englishPattern, spanishTranslation] of Object.entries(errorTranslations)) {
+        if (message.includes(englishPattern) || englishPattern.includes(message)) {
+            return spanishTranslation;
+        }
+    }
+    
+    return message; // Si no hay traducción, devolver el mensaje original
+};
+
 // Configurar interceptor para manejar errores
 axios.interceptors.response.use(
     response => response,
@@ -12,23 +69,45 @@ axios.interceptors.response.use(
         if (error.response) {
             // El servidor respondió con un código de estado fuera del rango 2xx
             const errorData = error.response.data;
-            console.error('Error de respuesta:', errorData);
             
-            // Si hay errores de validación, devolver el primer error
+            // Si hay errores de validación, traducir y devolver el primer error
             if (errorData.errors) {
-                const firstError = Object.values(errorData.errors)[0][0];
-                return Promise.reject({ message: firstError });
+                const errors = errorData.errors;
+                let translatedErrors = {};
+                
+                // Traducir todos los errores
+                for (const [field, messages] of Object.entries(errors)) {
+                    translatedErrors[field] = messages.map(msg => translateError(msg));
+                }
+                
+                // Devolver el primer error traducido
+                const firstErrorField = Object.keys(translatedErrors)[0];
+                const firstError = translatedErrors[firstErrorField][0];
+                
+                return Promise.reject({ 
+                    message: firstError,
+                    errors: translatedErrors,
+                    originalError: errorData
+                });
+            }
+            
+            // Traducir mensaje de error general
+            if (errorData.message) {
+                const translatedMessage = translateError(errorData.message);
+                return Promise.reject({
+                    ...errorData,
+                    message: translatedMessage
+                });
             }
             
             return Promise.reject(errorData);
         } else if (error.request) {
             // La petición fue hecha pero no se recibió respuesta
-            console.error('Error de red:', error.request);
             return Promise.reject({ message: 'Error de red. Por favor, verifica tu conexión.' });
         } else {
             // Algo pasó al configurar la petición
-            console.error('Error:', error.message);
-            return Promise.reject({ message: 'Error al procesar la petición.' });
+            const translatedMessage = translateError(error.message);
+            return Promise.reject({ message: translatedMessage });
         }
     }
 );
@@ -64,7 +143,6 @@ const authService = {
             });
             return response.data;
         } catch (error) {
-            console.error('Error en registro:', error);
             throw error;
         }
     },
