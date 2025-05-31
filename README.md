@@ -194,7 +194,7 @@ php artisan optimize           # Optimizar aplicación
 - **React & Material-UI** - Interfaz moderna y componentes
 - **Framer Motion** - Animaciones fluidas y profesionales
 - **Vite** - Herramientas de desarrollo rápidas
-- **Raúl Juan Martí** - Que me a acompañado durante el desarrollo
+- **Raúl Juan Martí** - Que me ha acompañado durante el desarrollo
 
 ---
 
