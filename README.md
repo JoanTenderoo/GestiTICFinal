@@ -83,7 +83,6 @@ GestiTIC es un sistema web moderno y completo para la gestión integral del equi
 - **Prioridades**: Baja, Media, Alta, Urgente
 - **Seguimiento completo** del ciclo de vida
 - **Búsqueda y filtrado** avanzado
-- **Historial de cambios** (logs de auditoría)
 
 ### 💻 Gestión de Equipamiento
 - **Estados**: Operativo, Averiado, Reparación, Retirado
@@ -125,7 +124,6 @@ GestiTIC es un sistema web moderno y completo para la gestión integral del equi
 - 🛡️ **Validación de datos**: Frontend y backend
 - 🚫 **Protección CSRF**: Tokens en formularios
 - 🔍 **Sanitización**: Prevención XSS y SQL injection
-- 📝 **Logs de auditoría**: Trazabilidad completa
 
 ---
 
@@ -136,13 +134,11 @@ GestiTIC es un sistema web moderno y completo para la gestión integral del equi
 - **Ubicaciones**: Mapeo de espacios físicos
 - **Equipamiento**: Inventario de dispositivos
 - **Incidencias**: Registro de problemas técnicos
-- **Logs**: Auditoría de cambios
 
 ### Relaciones
 - Usuario → Incidencias (1:N)
 - Ubicación → Equipamiento (1:N)
 - Equipamiento → Incidencias (1:N)
-- Incidencia → Logs (1:N)
 
 ---
 
@@ -177,18 +173,9 @@ php artisan optimize           # Optimizar aplicación
 
 ---
 
-## 📝 Documentación
-
-📖 **Documentación Completa**: [DOCUMENTACION_COMPLETA.md](DOCUMENTACION_COMPLETA.md)  
-🏗️ **Arquitectura del Sistema**: Separación Frontend/Backend con API RESTful  
-🔧 **Guía de Instalación**: Instrucciones detalladas paso a paso  
-👤 **Manual de Usuario**: Guía completa de funcionalidades  
-
----
-
 ## 📞 Soporte y Contacto
 
-- 📧 **Email**: joatencom@alu.edu.gva.es
+- 📧 **Email**: joatencam@alu.edu.gva.es
 - 🐛 **Issues**: Reporta problemas en GitHub Issues
 - 💬 **Soporte**: Contacta al equipo de desarrollo
 
@@ -207,10 +194,8 @@ php artisan optimize           # Optimizar aplicación
 - **React & Material-UI** - Interfaz moderna y componentes
 - **Framer Motion** - Animaciones fluidas y profesionales
 - **Vite** - Herramientas de desarrollo rápidas
-- **Raúl Juan Martí** - Herramiento de apoyo
+- **Raúl Juan Martí** - Que me a acompañado durante el desarrollo
 
 ---
 
 **© 2025 GestiTIC - Sistema de Gestión de Equipamiento IT**
-
-> *"Optimizando la gestión tecnológica con herramientas modernas"* 
